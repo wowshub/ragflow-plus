@@ -76,3 +76,50 @@ services:
     restart: on-failure
     extra_hosts:
       - "host.docker.internal:host-gateway"
+  vllm-bge:
+    container_name: vllm-bge
+    image: vllm/vllm-openai:latest
+    ipc: host
+    volumes:
+      - ../models:/models
+    command: [
+      "--model", "/models/bge-m3",
+      "--served-model-name", "bge-m3",
+      "--dtype", "float16",
+      "--gpu-memory-utilization", "0.9"
+    ]
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    networks:
+      - ragflow
+
+  vllm-deepseek:
+    container_name: vllm-deepseek
+    image: vllm/vllm-openai:latest
+    ipc: host
+    volumes:
+      - ../models:/models
+    command: [
+      "--model", "/models/DeepSeek-R1-1.5B",
+      "--served-model-name", "deepseek-r1",
+      "--dtype", "float16",
+      "--tensor-parallel-size", "1",
+      "--max-model-len", "4096"
+    ]
+    ports:
+      - "8001:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    networks:
+      - ragflow
+    
